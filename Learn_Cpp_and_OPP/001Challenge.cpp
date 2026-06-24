@@ -2,24 +2,40 @@
 #include <string>
 #include <vector>
 
-#define G		1
-#define PG		2
-#define PG_13	3
-#define R		4
-
 using namespace std;
+
+enum class Rating
+{
+	G, PG, PG_13, R
+};
+
+const char* convertRating(Rating ra) {
+	switch (ra)
+	{
+	case Rating::G:
+		return "G";
+	case Rating::PG:
+		return "PG";
+	case Rating::PG_13:
+		return "PG_13";
+	case Rating::R:
+		return "R";
+	default:
+		return "Unknow";
+	}
+}
 
 class Movie
 {
 private:
 	string name;
-	int rating;
+	Rating rating;
 	int watched;
 public:
-	Movie(string movName, int movRating, int movWatch = 0) :name{ movName }, rating{ movRating }, watched{ movWatch } {}
-	string getNameMovie() { return name; }
-	int getRating() { return rating; }
-	int getWatched() { return watched; }
+	Movie(string movName, Rating movRating, int movWatch = 0) :name{ movName }, rating{ movRating }, watched{ movWatch } {}
+	string getNameMovie() const{ return name; }
+	Rating getRating() const { return rating; }
+	int getWatched() const { return watched; }
 	void incrementWatch() {
 		watched++;
 	}
@@ -30,74 +46,50 @@ class Movies
 private:
 	vector<Movie> collection;
 public:
-	Movies(vector<Movie>& vec) {
-		int n = vec.size();
-		for (size_t i = 0; i < n; i++)
+	Movies() {}
+
+	void addMovie(const Movie& m) {
+		for (Movie& mov : collection)
 		{
-			collection.push_back(vec[i]);
-		}
-	}
-	int checkMovie(Movie& m) {
-		for (size_t i = 0; i < collection.size(); i++)
-		{
-			if (m.getNameMovie() == collection[i].getNameMovie())
+			if (mov.getNameMovie() == m.getNameMovie())
 			{
-				return i;
+				cout << "Movie's name have been added already!" << endl;
+				return;
 			}
 		}
-		return -1;
+		collection.push_back(m);
 	}
 
-	void addMovie(Movie& m) {
-		if (checkMovie(m)==-1)
+	void updateWatch(const Movie& m) {
+		for (Movie&mov:collection)
 		{
-			collection.push_back(m);
+			if (mov.getNameMovie() == m.getNameMovie())
+			{
+				mov.incrementWatch();
+				return;
+			}
 		}
-		else
-		{
-			cout << "Movie's name have been added already!" << endl;
-		}
-	}
-
-	void updateWatch(Movie& m) {
-		if (checkMovie(m)==-1)
-		{
-			cout << "Eror! Movie is not found" << endl; 
-		}
-		else
-		{
-			m.incrementWatch();
-			collection.at(checkMovie(m)).incrementWatch();
-		}
+		cout << "Eror! Movie is not found" << endl;
 	}
 
 	void displayRoPhim() {
 		for (auto n : collection) {
-			cout << n.getNameMovie() << "       |      " << n.getRating() << "      |      " << n.getWatched() << endl;
+			cout << n.getNameMovie() << "       |      " << convertRating(n.getRating()) << "      |      " << n.getWatched() << endl;
 		}
 		cout << endl;
 	}
 };
 
 int main() {
-	vector<Movie> SystemMovies;
-	Movie f1("See you again 1", G, 10);
-	Movie f2("See you again 2", R, 0);
-	Movie f3("See you again 3", PG, 5);
-	Movie f4("See you again 4", PG_13, 56);
-	SystemMovies.push_back(f1);
-	SystemMovies.push_back(f2);
-	SystemMovies.push_back(f3);
-	SystemMovies.push_back(f4);
 
-	Movies RoPhim(SystemMovies);
+	Movies RoPhim;
+	RoPhim.addMovie(Movie("See you again 1", Rating::G, 10));
+	RoPhim.addMovie(Movie("See you again 2", Rating::PG_13, 34));
+	RoPhim.addMovie(Movie("See you again 3", Rating::R, 5));
+	RoPhim.addMovie(Movie("See you again 4", Rating::PG, 7));
+	RoPhim.displayRoPhim();
 
-	Movie f5("See you again 5", PG_13, 100);
-	RoPhim.addMovie(f5);
-
-	Movie f6("See you again 3", PG_13, 100);
-	//RoPhim.addMovie(f6);
-	RoPhim.updateWatch(f1);
+	RoPhim.updateWatch(Movie("See you again 3", Rating::G, 10));
 	RoPhim.displayRoPhim();
 
 	return 0;
